@@ -158,8 +158,8 @@ func Test_Error_WithSingleSystemError(t *testing.T) {
 
 func Test_Error_WithLayersOfSystemErrorsAndOneNonSystemError(t *testing.T) {
 	f1 := errors.New("foo bar")
-	f2 := SystemWrap("d", "e", "f", f1)
-	f3 := SystemWrap("g", "h", "i", f2)
+	f2 := SystemWrap(f1, "d", "e", "f")
+	f3 := SystemWrap(f2, "g", "h", "i")
 
 	actual := f3.Error()
 
@@ -171,8 +171,8 @@ func Test_Error_WithLayersOfSystemErrorsAndOneNonSystemError(t *testing.T) {
 
 func Test_Error_WithLayersOfSystemErrors(t *testing.T) {
 	f1 := System("a", "b", "c")
-	f2 := SystemWrap("d", "e", "f", f1)
-	f3 := SystemWrap("g", "h", "i", f2)
+	f2 := SystemWrap(f1, "d", "e", "f")
+	f3 := SystemWrap(f2, "g", "h", "i")
 
 	actual := f3.Error()
 

@@ -29,7 +29,7 @@ func NewService(projectID string, namespace string) (*Service, error) {
 	client, err := datastore.NewClient(context.Background(), projectID)
 	if err != nil {
 		return nil,
-			fault.SystemWrap("db", "NewService", "failed to create Google Cloud Datastore client", err)
+			fault.SystemWrap(err, "db", "NewService", "failed to create Google Cloud Datastore client")
 	}
 	return &Service{
 		client:    client,
@@ -42,7 +42,7 @@ func (svc *Service) Upsert(ctx context.Context, e Entity) error {
 	key := datastore.NameKey(e.Kind(), e.ID(), nil)
 	key.Namespace = svc.namespace
 	if _, err := svc.client.Put(ctx, key, e); err != nil {
-		return fault.SystemWrap("db", "PutEntity", "error writing to Google Cloud Datastore", err)
+		return fault.SystemWrap(err, "db", "PutEntity", "error writing to Google Cloud Datastore")
 	}
 	return nil
 }
@@ -64,7 +64,8 @@ func (svc *Service) Insert(ctx context.Context, e Entity) (alreadyExists bool, e
 			return true, nil
 		}
 
-		return false, fault.SystemWrap("db", "InsertEntity", "error writing to Google Cloud Datastore", dbErr)
+		return false, fault.SystemWrap(dbErr, "db", "InsertEntity",
+			"error writing to Google Cloud Datastore")
 	}
 	return false, nil
 }
@@ -79,7 +80,7 @@ func (svc *Service) Get(ctx context.Context, e Entity) error {
 			return nil
 		}
 
-		return fault.SystemWrap("db", "GetEntity", "error reading from Google Cloud Datastore", err)
+		return fault.SystemWrap(err, "db", "GetEntity", "error reading from Google Cloud Datastore")
 	}
 
 	return nil
@@ -93,7 +94,7 @@ func (svc *Service) Query(
 	q := query.Namespace(svc.namespace)
 
 	if _, err := svc.client.GetAll(ctx, q, entities); err != nil {
-		return fault.SystemWrap("db", "QueryEntities", "error reading from Google Cloud Datastore", err)
+		return fault.SystemWrap(err, "db", "QueryEntities", "error reading from Google Cloud Datastore")
 	}
 
 	return nil
@@ -108,7 +109,7 @@ func (svc *Service) Count(
 	keys, err := svc.client.GetAll(ctx, q, nil)
 	if err != nil {
 		return -1,
-			fault.SystemWrap("db", "Count", "error reading from Google Cloud Datastore", err)
+			fault.SystemWrap(err, "db", "Count", "error reading from Google Cloud Datastore")
 	}
 
 	return len(keys), nil

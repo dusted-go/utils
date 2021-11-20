@@ -136,6 +136,12 @@ func User(code string, msg string) *UserError {
 	}
 }
 
+// Userf creates a new UserError fault.
+func Userf(code string, format string, a ...interface{}) *UserError {
+	return User(code, fmt.Sprintf(format, a...))
+
+}
+
 // ------
 // System Error
 // ------
@@ -177,9 +183,15 @@ func System(pkg string, function string, msg string) *SystemError {
 	}
 }
 
+// Systemf creates a new SystemError fault whilst preserving the stack trace.
+func Systemf(pkg string, function string, format string, a ...interface{}) *SystemError {
+	msg := fmt.Sprintf(format, a...)
+	return System(pkg, function, msg)
+}
+
 // SystemWrap creates a new SystemError fault, wrapping an
 // existing error and preserving the entire stack trace.
-func SystemWrap(pkg string, function string, msg string, err error) *SystemError {
+func SystemWrap(err error, pkg string, function string, msg string) *SystemError {
 	var wrappedErr error
 	var msgs []string
 
@@ -205,4 +217,15 @@ func SystemWrap(pkg string, function string, msg string, err error) *SystemError
 		err:  wrappedErr,
 		msgs: append(msgs, fmt.Sprintf("%s.%s: %s", pkg, function, msg)),
 	}
+}
+
+// SystemWrapf creates a new SystemError fault, wrapping an
+// existing error and preserving the entire stack trace.
+func SystemWrapf(
+	err error,
+	pkg string,
+	function string,
+	format string,
+	a ...interface{}) *SystemError {
+	return SystemWrap(err, pkg, function, fmt.Sprintf(format, a...))
 }

@@ -34,7 +34,7 @@ func Verify(ctx context.Context, siteKey, secret, captchaResponse string) (bool,
 	)
 	if err != nil {
 		return false,
-			fault.SystemWrap("hcaptcha", "Verify", "creating HTTP request failed", err)
+			fault.SystemWrap(err, "hcaptcha", "Verify", "creating HTTP request failed")
 	}
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
@@ -44,7 +44,7 @@ func Verify(ctx context.Context, siteKey, secret, captchaResponse string) (bool,
 	resp, err := client.Do(req)
 	if err != nil {
 		return false,
-			fault.SystemWrap("hcaptcha", "Verify", "sending HTTP request to hCaptcha failed", err)
+			fault.SystemWrap(err, "hcaptcha", "Verify", "sending HTTP request to hCaptcha failed")
 	}
 
 	// Read response:
@@ -53,7 +53,7 @@ func Verify(ctx context.Context, siteKey, secret, captchaResponse string) (bool,
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return false,
-			fault.SystemWrap("hcaptcha", "Verify", "reading HTTP response body failed", err)
+			fault.SystemWrap(err, "hcaptcha", "Verify", "reading HTTP response body failed")
 	}
 
 	// Deserialize response:
@@ -68,7 +68,8 @@ func Verify(ctx context.Context, siteKey, secret, captchaResponse string) (bool,
 	err = json.Unmarshal(body, &captchaResult)
 	if err != nil {
 		return false,
-			fault.SystemWrap("hcaptcha", "Verify", "deserializing response body from JSON failed", err)
+			fault.SystemWrap(err, "hcaptcha", "Verify",
+				"deserializing response body from JSON failed")
 	}
 
 	// Interpret result:
@@ -82,22 +83,26 @@ func Verify(ctx context.Context, siteKey, secret, captchaResponse string) (bool,
 		if code == "missing-input-secret" {
 			// Secret key is missing.
 			return false,
-				fault.SystemWrap("hcaptcha", "Verify", "hCaptcha is misconfigured on the server", err)
+				fault.SystemWrap(err, "hcaptcha", "Verify",
+					"hCaptcha is misconfigured on the server")
 
 		} else if code == "invalid-input-secret" {
 			// Secret key is invalid or malformed.
 			return false,
-				fault.SystemWrap("hcaptcha", "Verify", "hCaptcha is misconfigured on the server", err)
+				fault.SystemWrap(err, "hcaptcha", "Verify",
+					"hCaptcha is misconfigured on the server")
 
 		} else if code == "not-using-dummy-passcode" {
 			// You have used a testing sitekey but have not used its matching secret.
 			return false,
-				fault.SystemWrap("hcaptcha", "Verify", "hCaptcha is misconfigured on the server", err)
+				fault.SystemWrap(err, "hcaptcha", "Verify",
+					"hCaptcha is misconfigured on the server")
 
 		} else if code == "sitekey-secret-mismatch" {
 			// The sitekey is not registered with the provided secret.
 			return false,
-				fault.SystemWrap("hcaptcha", "Verify", "hCaptcha is misconfigured on the server", err)
+				fault.SystemWrap(err, "hcaptcha", "Verify",
+					"hCaptcha is misconfigured on the server")
 		}
 	}
 

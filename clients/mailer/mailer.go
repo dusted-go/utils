@@ -95,7 +95,8 @@ func (e *email) ToBinary() ([]byte, error) {
 	enc := gob.NewEncoder(&b)
 	err := enc.Encode(e)
 	if err != nil {
-		return nil, fault.SystemWrap("mailer", "ToBinary", "failed to encode email message", err)
+		return nil, fault.SystemWrap(err, "mailer", "ToBinary",
+			"failed to encode email message")
 	}
 	return b.Bytes(), nil
 }
@@ -143,8 +144,8 @@ func (m *Mailer) sendMessage(
 	data, err := msg.ToBinary()
 	if err != nil {
 		return emptyMessageID,
-			fault.SystemWrap("mailer", "sendMessage",
-				"failed to serialize message to byte array.", err)
+			fault.SystemWrap(err, "mailer", "sendMessage",
+				"failed to serialize message to byte array.")
 	}
 	attr := map[string]string{
 		"environment": m.environmentName,
@@ -168,8 +169,8 @@ func (m *Mailer) sendMessage(
 		msgID, err := result.Get(ctx)
 		if err != nil {
 			return msgID,
-				fault.SystemWrap("mailer", "sendMessage",
-					"failed to publish message to PubSub topic", err)
+				fault.SystemWrap(err, "mailer", "sendMessage",
+					"failed to publish message to PubSub topic")
 		}
 		return msgID, nil
 	case <-ctx.Done():
