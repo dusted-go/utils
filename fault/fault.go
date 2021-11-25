@@ -2,6 +2,7 @@ package fault
 
 import (
 	"fmt"
+	"io"
 	"strings"
 
 	pkgerrors "github.com/pkg/errors"
@@ -68,6 +69,11 @@ func (e *UserError) errorMessage(includeCode bool) string {
 		}
 	}
 	return sb.String()
+}
+
+// String returns the error message.
+func (e *UserError) String() string {
+	return e.Error()
 }
 
 // Error will return a string of one or all user errors.
@@ -164,6 +170,16 @@ type SystemError struct {
 	msgs []string
 }
 
+// Cause returns the underlying error.
+func (e *SystemError) Cause() error {
+	return e.err
+}
+
+// String returns the error message.
+func (e *SystemError) String() string {
+	return e.Error()
+}
+
 // Error returns the error message.
 func (e *SystemError) Error() string {
 	return e.err.Error()
@@ -172,6 +188,25 @@ func (e *SystemError) Error() string {
 // StackTrace returns the error message including the stack trace.
 func (e *SystemError) StackTrace() string {
 	return fmt.Sprintf("%+v", e.err)
+}
+
+// Format implements the fmt.Formatter interface.
+// Implementation inspired by:
+// https://github.com/pkg/errors/blob/5dd12d0cfe7f152f80558d591504ce685299311e/errors.go#L165
+func (e *SystemError) Format(s fmt.State, verb rune) {
+	switch verb {
+	case 'v':
+		if s.Flag('+') {
+			fmt.Fprintf(s, "%+v", e.Cause())
+			return
+		}
+		fallthrough
+	case 's':
+		// nolint: errcheck
+		io.WriteString(s, e.Error())
+	case 'q':
+		fmt.Fprintf(s, "%q", e.Error())
+	}
 }
 
 // System creates a new SystemError fault whilst preserving the stack trace.
