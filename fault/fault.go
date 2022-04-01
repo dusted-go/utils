@@ -190,6 +190,11 @@ func (e *SystemError) StackTrace() string {
 	return fmt.Sprintf("%+v", e.err)
 }
 
+// Unwrap returns the original underlying error.
+func (e *SystemError) Unwrap() error {
+	return e.err
+}
+
 // Format implements the fmt.Formatter interface.
 // Implementation inspired by:
 // https://github.com/pkg/errors/blob/5dd12d0cfe7f152f80558d591504ce685299311e/errors.go#L165
