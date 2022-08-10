@@ -5,7 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 
 	"github.com/dusted-go/utils/fault"
@@ -50,7 +50,7 @@ func Verify(ctx context.Context, siteKey, secret, captchaResponse string) (bool,
 	// Read response:
 	// ---
 	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return false,
 			fault.SystemWrap(err, "hcaptcha", "Verify", "reading HTTP response body failed")

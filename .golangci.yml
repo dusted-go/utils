@@ -10,7 +10,6 @@ linters:
     - errorlint
     - errname
     - exhaustive
-    - exhaustivestruct
     - exportloopref
     - goconst
     - gofmt
