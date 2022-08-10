@@ -1,11 +1,12 @@
 package fault
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"strings"
 
-	pkgerrors "github.com/pkg/errors"
+	"github.com/dusted-go/utils/stack"
 )
 
 // ------
@@ -25,8 +26,9 @@ import (
 // Error codes should ideally be unique and descriptive strings in order to prevent collision in a larger application.
 //
 // Examples:
-//    "MISSING_FIRST_NAME": "Please provide your first name"
-//    "INVALID_EMAIL_ADDR": "Please provide a valid email address"
+//
+//	"MISSING_FIRST_NAME": "Please provide your first name"
+//	"INVALID_EMAIL_ADDR": "Please provide a valid email address"
 type UserError struct {
 	// map of error codes and messages
 	errors map[string]string
@@ -79,15 +81,17 @@ func (e *UserError) String() string {
 // Error will return a string of one or all user errors.
 //
 // If there is only one user error it will be represented as a single string.
-//   Example:
-//      Email address is required (MISSING_EMAIL_ADDRESS)
+//
+//	Example:
+//	   Email address is required (MISSING_EMAIL_ADDRESS)
 //
 // If there are more than one user error (e.g. multiple validation errors)
 // then a multi line string resembling a list of errors will be returned.
-//   Example:
-//      - First name is required (MISSING_FIRST_NAME)
-//      - Last name is required (MISSING_LAST_NAME)
-//      - Invalid email address (INVALID_EMAIL_ADDRESS)
+//
+//	Example:
+//	   - First name is required (MISSING_FIRST_NAME)
+//	   - Last name is required (MISSING_LAST_NAME)
+//	   - Invalid email address (INVALID_EMAIL_ADDRESS)
 //
 // Use FriendlyError() to compute the same string without error codes attached.
 //
@@ -101,15 +105,17 @@ func (e *UserError) Error() string {
 // FriendlyError is equivalent to Error() except it doesn't include error codes in the message.
 //
 // If there is only one user error it will be represented as a single string.
-//   Example:
-//      Email address is required
+//
+//	Example:
+//	   Email address is required
 //
 // If there are more than one user error (e.g. multiple validation errors)
 // then a multi line string resembling a list of errors will be returned.
-//   Example:
-//      - First name is required
-//      - Last name is required
-//      - Invalid email address
+//
+//	Example:
+//	   - First name is required
+//	   - Last name is required
+//	   - Invalid email address
 //
 // Use Error() to compute the same string with error codes attached.
 //
@@ -166,13 +172,9 @@ const (
 // - unexpected error from making a HTTP call
 // - etc.
 type SystemError struct {
-	err  error
-	msgs []string
-}
-
-// Cause returns the underlying error.
-func (e *SystemError) Cause() error {
-	return e.err
+	err   error
+	msgs  []string
+	stack string
 }
 
 // String returns the error message.
@@ -187,7 +189,7 @@ func (e *SystemError) Error() string {
 
 // StackTrace returns the error message including the stack trace.
 func (e *SystemError) StackTrace() string {
-	return fmt.Sprintf("%+v", e.err)
+	return fmt.Sprintf("\n%s\n%s", e.err, e.stack)
 }
 
 // Unwrap returns the original underlying error.
@@ -202,7 +204,7 @@ func (e *SystemError) Format(s fmt.State, verb rune) {
 	switch verb {
 	case 'v':
 		if s.Flag('+') {
-			fmt.Fprintf(s, "%+v", e.Cause())
+			fmt.Fprintf(s, "%s", e.StackTrace())
 			return
 		}
 		fallthrough
@@ -217,9 +219,11 @@ func (e *SystemError) Format(s fmt.State, verb rune) {
 // System creates a new SystemError fault whilst preserving the stack trace.
 func System(pkg string, function string, msg string) *SystemError {
 	m := fmt.Sprintf("%s.%s: %s", pkg, function, msg)
+
 	return &SystemError{
-		err:  pkgerrors.New(m),
-		msgs: []string{m},
+		err:   errors.New(m),
+		msgs:  []string{m},
+		stack: stack.Capture().String(),
 	}
 }
 
@@ -236,7 +240,7 @@ func SystemWrap(err error, pkg string, function string, msg string) *SystemError
 	var msgs []string
 
 	// Purposefully using a type assertion instead of checking against all underlying errors
-	// using the errors.As function so no information is lost the wrapping.
+	// using the errors.As function so that no information is lost when wrapping.
 	// nolint: errorlint
 	if sysErr, ok := err.(*SystemError); ok {
 		pad := padding
@@ -246,16 +250,17 @@ func SystemWrap(err error, pkg string, function string, msg string) *SystemError
 			sb.WriteString(fmt.Sprintf("\n%s%s", pad, m))
 			pad = pad + padding
 		}
-		wrappedErr = pkgerrors.Errorf("%s.%s: %s%s", pkg, function, msg, sb.String())
+		wrappedErr = fmt.Errorf("%s.%s: %s%s", pkg, function, msg, sb.String())
 		msgs = sysErr.msgs
 	} else {
-		wrappedErr = pkgerrors.Errorf("%s.%s: %s\n%s%v", pkg, function, msg, padding, err)
+		wrappedErr = fmt.Errorf("%s.%s: %s\n%s%v", pkg, function, msg, padding, err)
 		msgs = []string{err.Error()}
 	}
 
 	return &SystemError{
-		err:  wrappedErr,
-		msgs: append(msgs, fmt.Sprintf("%s.%s: %s", pkg, function, msg)),
+		err:   wrappedErr,
+		msgs:  append(msgs, fmt.Sprintf("%s.%s: %s", pkg, function, msg)),
+		stack: stack.Capture().String(),
 	}
 }
 

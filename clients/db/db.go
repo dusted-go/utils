@@ -24,9 +24,9 @@ type Service struct {
 }
 
 // NewService creates a new instance of Service.
-func NewService(projectID string, namespace string) (*Service, error) {
+func NewService(ctx context.Context, projectID string, namespace string) (*Service, error) {
 
-	client, err := datastore.NewClient(context.Background(), projectID)
+	client, err := datastore.NewClient(ctx, projectID)
 	if err != nil {
 		return nil,
 			fault.SystemWrap(err, "db", "NewService", "failed to create Google Cloud Datastore client")
