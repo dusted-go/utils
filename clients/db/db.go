@@ -77,6 +77,7 @@ func (svc *Service) Get(ctx context.Context, e Entity) error {
 	key.Namespace = svc.namespace
 	if err := svc.client.Get(ctx, key, e); err != nil {
 		if errors.Is(err, datastore.ErrNoSuchEntity) {
+			e = nil
 			return nil
 		}
 

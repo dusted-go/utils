@@ -1,6 +1,10 @@
 Release Notes
 =============
 
+## 1.3.0
+
+- `db.Get` will set the entity to `nil` if it cannot be found.
+
 ## 1.2.0
 
 - `fault.UserError` and `fault.SystemError` implement the `Stringer` interface.
