@@ -1,6 +1,10 @@
 Release Notes
 =============
 
+## 1.6.0
+
+- Changed `db.Get` interface to include `bool` flag indicating if the entity could be found.
+
 ## 1.5.0
 
 - `db.Get` will set the entity to `nil` if it cannot be found.

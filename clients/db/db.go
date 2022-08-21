@@ -71,20 +71,20 @@ func (svc *Service) Insert(ctx context.Context, e Entity) (alreadyExists bool, e
 }
 
 // Get loads the single entity which matches the kind and key of the given object.
-func (svc *Service) Get(ctx context.Context, e Entity) error {
+// The function will return false if the entity cannot be found or an error has occurred.
+func (svc *Service) TryGet(ctx context.Context, e Entity) (bool, error) {
 
 	key := datastore.NameKey(e.Kind(), e.ID(), nil)
 	key.Namespace = svc.namespace
 	if err := svc.client.Get(ctx, key, e); err != nil {
 		if errors.Is(err, datastore.ErrNoSuchEntity) {
-			e = nil
-			return nil
+			return false, nil
 		}
 
-		return fault.SystemWrap(err, "db", "GetEntity", "error reading from Google Cloud Datastore")
+		return false, fault.SystemWrap(err, "db", "GetEntity", "error reading from Google Cloud Datastore")
 	}
 
-	return nil
+	return true, nil
 }
 
 // Query finds all entities which match the given query.
