@@ -1,6 +1,10 @@
 Release Notes
 =============
 
+## 1.7.0
+
+- Re-factored db.Service to provide better interface through generics.
+
 ## 1.6.0
 
 - Changed `db.Get` interface to include `bool` flag indicating if the entity could be found.

@@ -18,41 +18,40 @@ type Entity interface {
 }
 
 // Service exposes read and write operations to Google Cloud Datastore.
-type Service struct {
+type Service[T Entity] struct {
 	client    *datastore.Client
 	namespace string
 }
 
 // NewService creates a new instance of Service.
-func NewService(ctx context.Context, projectID string, namespace string) (*Service, error) {
-
+func NewService[T Entity](ctx context.Context, projectID string, namespace string) (*Service[T], error) {
 	client, err := datastore.NewClient(ctx, projectID)
 	if err != nil {
 		return nil,
 			fault.SystemWrap(err, "db", "NewService", "failed to create Google Cloud Datastore client")
 	}
-	return &Service{
+	return &Service[T]{
 		client:    client,
 		namespace: namespace}, nil
 }
 
 // Upsert creates a new or updates an existing entity in GCP Datastore.
-func (svc *Service) Upsert(ctx context.Context, e Entity) error {
+func (svc *Service[T]) Upsert(ctx context.Context, entity T) error {
 
-	key := datastore.NameKey(e.Kind(), e.ID(), nil)
+	key := datastore.NameKey(entity.Kind(), entity.ID(), nil)
 	key.Namespace = svc.namespace
-	if _, err := svc.client.Put(ctx, key, e); err != nil {
+	if _, err := svc.client.Put(ctx, key, entity); err != nil {
 		return fault.SystemWrap(err, "db", "PutEntity", "error writing to Google Cloud Datastore")
 	}
 	return nil
 }
 
 // Insert creates a new entity in GCP Datastore or fails with an error.
-func (svc *Service) Insert(ctx context.Context, e Entity) (alreadyExists bool, err error) {
+func (svc *Service[T]) Insert(ctx context.Context, entity T) (alreadyExists bool, err error) {
 
-	key := datastore.NameKey(e.Kind(), e.ID(), nil)
+	key := datastore.NameKey(entity.Kind(), entity.ID(), nil)
 	key.Namespace = svc.namespace
-	insert := datastore.NewInsert(key, e)
+	insert := datastore.NewInsert(key, entity)
 	_, dbErr := svc.client.Mutate(ctx, insert)
 	if dbErr != nil {
 		// Get the underlying GRPC error if it's been wrapped as a MultiError
@@ -64,45 +63,40 @@ func (svc *Service) Insert(ctx context.Context, e Entity) (alreadyExists bool, e
 			return true, nil
 		}
 
-		return false, fault.SystemWrap(dbErr, "db", "InsertEntity",
-			"error writing to Google Cloud Datastore")
+		return false, fault.SystemWrap(dbErr, "db", "Insert", "error writing to Google Cloud Datastore")
 	}
 	return false, nil
 }
 
 // Get loads the single entity which matches the kind and key of the given object.
 // The function will return false if the entity cannot be found or an error has occurred.
-func (svc *Service) TryGet(ctx context.Context, e Entity) (bool, error) {
-
-	key := datastore.NameKey(e.Kind(), e.ID(), nil)
+func (svc *Service[T]) Get(ctx context.Context, kind, id string) (*T, error) {
+	key := datastore.NameKey(kind, id, nil)
 	key.Namespace = svc.namespace
-	if err := svc.client.Get(ctx, key, e); err != nil {
+	var entity T
+	if err := svc.client.Get(ctx, key, &entity); err != nil {
 		if errors.Is(err, datastore.ErrNoSuchEntity) {
-			return false, nil
+			return nil, nil
 		}
-
-		return false, fault.SystemWrap(err, "db", "GetEntity", "error reading from Google Cloud Datastore")
+		return nil, fault.SystemWrap(err, "db", "Get", "error reading from Google Cloud Datastore")
 	}
-
-	return true, nil
+	return &entity, nil
 }
 
 // Query finds all entities which match the given query.
-func (svc *Service) Query(
+func (svc *Service[T]) Query(
 	ctx context.Context,
-	query *datastore.Query,
-	entities interface{}) error {
+	query *datastore.Query) ([]T, error) {
 	q := query.Namespace(svc.namespace)
-
-	if _, err := svc.client.GetAll(ctx, q, entities); err != nil {
-		return fault.SystemWrap(err, "db", "QueryEntities", "error reading from Google Cloud Datastore")
+	var entities []T
+	if _, err := svc.client.GetAll(ctx, q, &entities); err != nil {
+		return nil, fault.SystemWrap(err, "db", "Query", "error reading from Google Cloud Datastore")
 	}
-
-	return nil
+	return entities, nil
 }
 
 // Count returns the total count of items resulting from a given query.
-func (svc *Service) Count(
+func (svc *Service[T]) Count(
 	ctx context.Context,
 	query *datastore.Query) (int, error) {
 	q := query.Namespace(svc.namespace).KeysOnly()
