@@ -247,3 +247,16 @@ func Test_FormatWithPlus_WithLayersOfSystemErrors_ReturnsSameAsStackTrace(t *tes
 		t.Error("The '+v' formatter should include a stack trace.")
 	}
 }
+
+func Test_WrapAlreadyWrappedError(t *testing.T) {
+
+	err1 := errors.New("original error")
+	err2 := fmt.Errorf("wrapped around original error: %w", err1)
+	err3 := SystemWrap(err2, "pkg", "func", "fancy error")
+
+	expected := "pkg.func: fancy error\n   wrapped around original error: original error"
+	actual := err3.String()
+	if actual != expected {
+		t.Errorf("Expected: %s, Actual: %s", expected, actual)
+	}
+}
