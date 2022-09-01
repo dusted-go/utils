@@ -8,7 +8,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	"github.com/dusted-go/utils/fault"
+	"github.com/dusted-go/fault/fault"
 )
 
 // Entity represents a single entity stored in Google Cloud Datastore.

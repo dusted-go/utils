@@ -8,7 +8,7 @@ import (
 
 	"cloud.google.com/go/pubsub"
 
-	"github.com/dusted-go/utils/fault"
+	"github.com/dusted-go/fault/fault"
 )
 
 // ------

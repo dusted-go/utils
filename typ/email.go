@@ -3,7 +3,7 @@ package typ
 import (
 	"strings"
 
-	"github.com/dusted-go/utils/fault"
+	"github.com/dusted-go/fault/fault"
 )
 
 var (

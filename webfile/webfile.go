@@ -6,7 +6,7 @@ import (
 	"mime/multipart"
 	"net/http"
 
-	"github.com/dusted-go/utils/fault"
+	"github.com/dusted-go/fault/fault"
 )
 
 // MimeType returns the media type of a multipart.File object.
