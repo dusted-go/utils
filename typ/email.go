@@ -1,4 +1,4 @@
-package email
+package typ
 
 import (
 	"strings"
@@ -7,67 +7,67 @@ import (
 )
 
 var (
-	Empty = Address{
+	EmptyEmail = Email{
 		value:  "",
 		domain: "",
 	}
 )
 
-// Address defines an email address object.
-type Address struct {
+// Email defines an email address object.
+type Email struct {
 	value  string
 	domain string
 }
 
 // Normalised returns a lowercase and trimmed string representation of an email address.
-func (a Address) Normalised() string {
-	return a.value
+func (e Email) Normalised() string {
+	return e.value
 }
 
 // Domain returns the part of an email address after the '@' sign.
-func (a Address) Domain() string {
-	return a.domain
+func (e Email) Domain() string {
+	return e.domain
 }
 
 // Equals checks if two email strings are the same.
-func (a Address) Equals(other string) bool {
-	return a.value == strings.ToLower(other)
+func (e Email) Equals(other string) bool {
+	return e.value == strings.ToLower(other)
 }
 
-// New validates, normalises and creates a new address.
-func New(value string) (Address, error) {
+// NewEmail validates, normalises and creates a new email.
+func NewEmail(value string) (Email, error) {
 
 	invalidEmailFault := fault.User("invalid_email_address", "Email address is invalid.")
 	value = strings.TrimSpace(strings.ToLower(value))
 	length := len(value)
 
 	if length == 0 {
-		return Empty,
+		return EmptyEmail,
 			fault.User("missing_email_address", "Email address is required.")
 	}
 
 	// Assuming minimum email is: x@x.xx
 	if length < 6 {
-		return Empty, invalidEmailFault
+		return EmptyEmail, invalidEmailFault
 	}
 
 	if !strings.ContainsRune(value, '@') {
-		return Empty, invalidEmailFault
+		return EmptyEmail, invalidEmailFault
 	}
 
 	if !strings.ContainsRune(value, '.') {
-		return Empty, invalidEmailFault
+		return EmptyEmail, invalidEmailFault
 	}
 
 	if strings.LastIndex(value, ".") < strings.LastIndex(value, "@") {
-		return Empty, invalidEmailFault
+		return EmptyEmail, invalidEmailFault
 	}
 
 	domain := strings.SplitN(value, "@", 2)[1]
-	emailAddr := Address{
+	email := Email{
 		value:  value,
 		domain: domain,
 	}
 
-	return emailAddr, nil
+	return email, nil
 }

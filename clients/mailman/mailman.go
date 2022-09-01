@@ -1,4 +1,4 @@
-package mailer
+package mailman
 
 import (
 	"bytes"
@@ -37,10 +37,10 @@ type email struct {
 
 // NewEmail creates a new *email struct.
 // nolint
-func (m *Mailer) NewEmail(subject string, recipients ...string) *email {
+func (c *Client) NewEmail(subject string, recipients ...string) *email {
 	return &email{
-		Domain:     m.domain,
-		Sender:     m.sender,
+		Domain:     c.domain,
+		Sender:     c.sender,
 		Recipients: recipients,
 		Subject:    subject,
 	}
@@ -95,16 +95,16 @@ func (e *email) ToBinary() ([]byte, error) {
 	enc := gob.NewEncoder(&b)
 	err := enc.Encode(e)
 	if err != nil {
-		return nil, fault.SystemWrap(err, "mailer", "ToBinary",
+		return nil, fault.SystemWrap(err, "Client", "ToBinary",
 			"failed to encode email message")
 	}
 	return b.Bytes(), nil
 }
 
 // ------
-// Public Mailer struct:
+// Public Client struct:
 // ------
-// The Mailer puts an email message into a pub sub
+// The Client puts an email message into a pub sub
 // topic inside Google Cloud which gets subsequently
 // picked up by a private Google Cloud Function to
 // actually send the message.
@@ -113,17 +113,17 @@ func (e *email) ToBinary() ([]byte, error) {
 
 const emptyMessageID = ""
 
-// Mailer allows sending emails to a recipient.
-type Mailer struct {
+// Client allows sending emails to a recipient.
+type Client struct {
 	topic           *pubsub.Topic
 	domain          string
 	sender          string
 	environmentName string
 }
 
-// New creates a new Mailer client to send emails.
-func New(topic *pubsub.Topic, domain, sender, environmentName string) *Mailer {
-	return &Mailer{
+// New creates a new Client client to send emails.
+func New(topic *pubsub.Topic, domain, sender, environmentName string) *Client {
+	return &Client{
 		topic:           topic,
 		domain:          domain,
 		sender:          sender,
@@ -131,31 +131,31 @@ func New(topic *pubsub.Topic, domain, sender, environmentName string) *Mailer {
 	}
 }
 
-func (m *Mailer) sendMessage(
+func (c *Client) sendMessage(
 	ctx context.Context,
 	msg *email) (string, error) {
 
-	if m.topic == nil || len(m.domain) == 0 || len(m.sender) == 0 {
+	if c.topic == nil || len(c.domain) == 0 || len(c.sender) == 0 {
 		return emptyMessageID,
-			fault.System("mailer", "sendMessage",
+			fault.System("Client", "sendMessage",
 				"cannot send email because the topic, domain or sender were not set")
 	}
 
 	data, err := msg.ToBinary()
 	if err != nil {
 		return emptyMessageID,
-			fault.SystemWrap(err, "mailer", "sendMessage",
+			fault.SystemWrap(err, "Client", "sendMessage",
 				"failed to serialize message to byte array.")
 	}
 	attr := map[string]string{
-		"environment": m.environmentName,
+		"environment": c.environmentName,
 	}
 
 	if len(msg.TraceID) > 0 {
 		attr["traceID"] = msg.TraceID
 	}
 
-	result := m.topic.Publish(ctx,
+	result := c.topic.Publish(ctx,
 		// No need to init the rest
 		// nolint: exhaustivestruct
 		&pubsub.Message{
@@ -169,21 +169,21 @@ func (m *Mailer) sendMessage(
 		msgID, err := result.Get(ctx)
 		if err != nil {
 			return msgID,
-				fault.SystemWrap(err, "mailer", "sendMessage",
+				fault.SystemWrap(err, "Client", "sendMessage",
 					"failed to publish message to PubSub topic")
 		}
 		return msgID, nil
 	case <-ctx.Done():
 		return emptyMessageID,
-			fault.System("mailer", "sendMessage",
+			fault.System("Client", "sendMessage",
 				"context got cancelled before email status could get verified")
 	}
 }
 
 // Send publishes a new email message to the `emails` topic which is being subscribed
 // by the Mailman Google Cloud Function.
-func (m *Mailer) Send(
+func (c *Client) Send(
 	ctx context.Context,
 	email *email) (msgID string, err error) {
-	return m.sendMessage(ctx, email)
+	return c.sendMessage(ctx, email)
 }

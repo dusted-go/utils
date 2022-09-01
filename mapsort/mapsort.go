@@ -1,12 +1,12 @@
-package maps
+package mapsort
 
 import (
 	"sort"
 	"strconv"
 )
 
-// SortKeys sorts the keys of a given map in alphabetical order.
-func SortKeys[T any](m map[string]T) []string {
+// Keys sorts the keys of a given map in alphabetical order.
+func Keys[T any](m map[string]T) []string {
 	keys := make([]string, 0, len(m))
 	for k := range m {
 		keys = append(keys, k)
@@ -17,8 +17,8 @@ func SortKeys[T any](m map[string]T) []string {
 	return keys
 }
 
-// SortKeys sorts the keys of a given map by their value in alphabetical order.
-func SortKeysByValue[T comparable](m map[T]string) []T {
+// KeysByValue sorts the keys of a given map by their value in alphabetical order.
+func KeysByValue[T comparable](m map[T]string) []T {
 
 	// Invert the map and make values keys and keys values:
 	inverted := map[string]T{}
@@ -39,7 +39,7 @@ func SortKeysByValue[T comparable](m map[T]string) []T {
 	}
 
 	// Sort the inverted map's keys:
-	sorted := SortKeys(inverted)
+	sorted := Keys(inverted)
 
 	// Get original keys in order of sorted values:
 	keys := make([]T, 0, len(m))

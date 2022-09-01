@@ -3,7 +3,14 @@ Release Notes
 
 ## 1.7.0
 
-- Re-factored db.Service to provide better interface through generics.
+- Renamed `db.Service` to `db.Client`
+- Renamed `storage.Service` to `storage.Client`
+- Renamed `mailer` pkg to `mailman`
+- Renamed `mailer.Mailer` to `mailman.Client`
+- Re-factored `db.Service`/`db.Client` to provide better UX through generics
+- Renamed `maps` pkg to `mapsort`
+- Renamed `email.Address` to `typ.Email`
+- Added `typ.URL` type
 
 ## 1.6.0
 

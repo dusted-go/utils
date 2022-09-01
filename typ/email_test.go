@@ -1,4 +1,4 @@
-package email
+package typ
 
 import (
 	"testing"
@@ -15,7 +15,7 @@ func Test_New_Unhappy(t *testing.T) {
 	}
 
 	for _, value := range cases {
-		_, err := New(value)
+		_, err := NewEmail(value)
 
 		if err == nil {
 			t.Errorf("The value '%s' was expected to fail email validation.", value)
@@ -30,7 +30,7 @@ func Test_New_Happy(t *testing.T) {
 	}
 
 	for _, value := range cases {
-		_, err := New(value)
+		_, err := NewEmail(value)
 
 		if err != nil {
 			t.Errorf("The value '%s' failed email validation.", value)
@@ -50,7 +50,7 @@ func Test_Domain_Normalised(t *testing.T) {
 	}
 
 	for _, value := range cases {
-		addr, err := New(value)
+		addr, err := NewEmail(value)
 
 		if err != nil {
 			t.Errorf("The value '%s' failed email validation.", value)

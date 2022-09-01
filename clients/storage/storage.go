@@ -11,20 +11,20 @@ import (
 	"github.com/dusted-go/utils/fault"
 )
 
-type Service struct {
+type Client struct {
 	client *storage.Client
 }
 
-func NewService(ctx context.Context) (*Service, error) {
+func NewClient(ctx context.Context) (*Client, error) {
 	client, err := storage.NewClient(ctx)
 	if err != nil {
 		return nil,
-			fault.SystemWrap(err, "storage", "NewService", "failed to create Google Cloud Storage client")
+			fault.SystemWrap(err, "storage", "NewClient", "failed to create Google Cloud Storage client")
 	}
-	return &Service{client: client}, nil
+	return &Client{client: client}, nil
 }
 
-func (s *Service) PutFile(
+func (c *Client) PutFile(
 	ctx context.Context,
 	bucketName string,
 	fileName string,
@@ -34,7 +34,7 @@ func (s *Service) PutFile(
 	aclEntity string,
 	aclRole string) error {
 
-	obj := s.client.Bucket(bucketName).Object(fileName)
+	obj := c.client.Bucket(bucketName).Object(fileName)
 	_, err := obj.Attrs(ctx)
 
 	if err != nil {
