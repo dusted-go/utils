@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+## 1.8.0
+
+- Moved `stack` to `github.com/dusteg-go/fault/stack`
+- Moved `fault` to `github.com/dusteg-go/fault/fault`
+
 ## 1.7.0
 
 - Renamed `db.Service` to `db.Client`
