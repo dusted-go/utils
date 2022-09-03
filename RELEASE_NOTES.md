@@ -1,5 +1,9 @@
 Release Notes
 =============
+## 1.9.0
+
+- Renamed `db.Client` to `db.Repo` to better reflect the latest re-factorings
+- Added more tests for db stuff
 
 ## 1.8.0
 
