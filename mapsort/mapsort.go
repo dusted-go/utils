@@ -18,31 +18,31 @@ func Keys[T any](m map[string]T) []string {
 }
 
 // KeysByValue sorts the keys of a given map by their value in alphabetical order.
-func KeysByValue[T comparable](m map[T]string) []T {
+func KeysByValue[K comparable, V any](m map[K]V, getStringValue func(V) string) []K {
 
 	// Invert the map and make values keys and keys values:
-	inverted := map[string]T{}
+	inverted := map[string]K{}
 	for k, v := range m {
 
 		// Force each value to be unique:
-		value := v
+		value := getStringValue(v)
 		i := 0
 		for {
-			if _, exists := inverted[v]; !exists {
+			if _, exists := inverted[value]; !exists {
 				break
 			}
-			v = value + strconv.Itoa(i)
+			value = value + strconv.Itoa(i)
 			i++
 		}
 
-		inverted[v] = k
+		inverted[value] = k
 	}
 
 	// Sort the inverted map's keys:
 	sorted := Keys(inverted)
 
 	// Get original keys in order of sorted values:
-	keys := make([]T, 0, len(m))
+	keys := make([]K, 0, len(m))
 	for _, v := range sorted {
 		k := inverted[v]
 		keys = append(keys, k)

@@ -1,5 +1,10 @@
 Release Notes
 =============
+
+## 1.10.0
+
+- Improved `mapsort.KeyByValue` to be more generic
+
 ## 1.9.0
 
 - Renamed `db.Client` to `db.Repo` to better reflect the latest re-factorings
