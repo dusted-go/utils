@@ -1,6 +1,10 @@
 Release Notes
 =============
 
+## 1.11.1
+
+- Fixed a bug in `webfile.MimeType`
+
 ## 1.11.0
 
 - Improved `webfile.MimeType` to get the mime type correctly for SVGs and other files as well.

@@ -6,13 +6,14 @@ import (
 	"mime"
 	"mime/multipart"
 	"net/http"
+	"path/filepath"
 
 	"github.com/dusted-go/fault/fault"
 )
 
 // MimeType returns the media type of a multipart.File object.
 func MimeType(f multipart.File, h *multipart.FileHeader) (string, error) {
-	mimeType := mime.TypeByExtension(h.Filename)
+	mimeType := mime.TypeByExtension(filepath.Ext(h.Filename))
 	if len(mimeType) > 0 {
 		return mimeType, nil
 	}
