@@ -1,6 +1,10 @@
 Release Notes
 =============
 
+## 1.11.0
+
+- Improved `webfile.MimeType` to get the mime type correctly for SVGs and other files as well.
+
 ## 1.10.0
 
 - Improved `mapsort.KeyByValue` to be more generic

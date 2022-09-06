@@ -3,6 +3,7 @@ package webfile
 import (
 	"crypto/sha256"
 	"encoding/hex"
+	"mime"
 	"mime/multipart"
 	"net/http"
 
@@ -10,7 +11,12 @@ import (
 )
 
 // MimeType returns the media type of a multipart.File object.
-func MimeType(f multipart.File) (string, error) {
+func MimeType(f multipart.File, h *multipart.FileHeader) (string, error) {
+	mimeType := mime.TypeByExtension(h.Filename)
+	if len(mimeType) > 0 {
+		return mimeType, nil
+	}
+
 	buff := make([]byte, 512)
 	_, err := f.Read(buff)
 	if err != nil {
