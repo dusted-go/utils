@@ -78,7 +78,7 @@ func (r *Repo[T]) Insert(ctx context.Context, key string, entity *T) (duplicate 
 }
 
 // Get loads the single entity which matches the kind and key of the given object.
-// The function will return false if the entity cannot be found or an error has occurred.
+// The function will return nil if the entity cannot be found or an error has occurred.
 func (r *Repo[T]) Get(ctx context.Context, key string) (*T, error) {
 	k := datastore.NameKey(r.kind, key, nil)
 	k.Namespace = r.namespace

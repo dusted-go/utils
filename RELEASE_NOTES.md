@@ -1,6 +1,10 @@
 Release Notes
 =============
 
+## 1.12.0
+
+- Improved the output from `(u URL) Pretty()`
+
 ## 1.11.1
 
 - Fixed a bug in `webfile.MimeType`

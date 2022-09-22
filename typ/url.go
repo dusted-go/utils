@@ -27,8 +27,9 @@ func (u URL) String() string {
 
 // Pretty returns a string without any http/https prefix.
 func (u URL) Pretty() string {
-	return strings.TrimPrefix(
-		strings.TrimPrefix(string(u),
-			"https://"),
-		"http://")
+	return strings.TrimSuffix(
+		strings.TrimPrefix(
+			strings.TrimPrefix(string(u),
+				"https://"),
+			"http://"), "/")
 }
