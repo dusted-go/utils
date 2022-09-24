@@ -1,6 +1,10 @@
 Release Notes
 =============
 
+## 1.13.0
+
+- Upgraded dependencies
+
 ## 1.12.0
 
 - Improved the output from `(u URL) Pretty()`
