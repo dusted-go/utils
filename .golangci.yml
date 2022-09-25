@@ -4,7 +4,6 @@ linters:
   disable-all: true
   enable:
     - bodyclose
-    - deadcode
     - durationcheck
     - errcheck
     - errorlint
@@ -23,12 +22,10 @@ linters:
     - predeclared
     - revive
     - staticcheck
-    - structcheck
     - typecheck
     - unconvert
     - unparam
     - unused
-    - varcheck
     - wastedassign
     - wrapcheck
 linters-settings:

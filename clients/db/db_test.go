@@ -55,7 +55,7 @@ func Test_CRUD_Foo(t *testing.T) {
 		t.Error(err.Error())
 	}
 
-	foos, err := repo.Query(ctx, repo.NewQuery().Filter("Bar=", "yada yada"))
+	foos, err := repo.Query(ctx, repo.NewQuery().FilterField("Bar", "=", "yada yada"))
 	if err != nil {
 		t.Error(err.Error())
 	}
