@@ -1,6 +1,10 @@
 Release Notes
 =============
 
+## 1.14.0
+
+- Upgraded dependencies
+
 ## 1.13.0
 
 - Upgraded dependencies

@@ -102,6 +102,8 @@ github.com/dusted-go/fault v1.0.0 h1:nKZ7vKxUHXELeqHS1ch2tio0QiThMaA9SffCceMP2Bo
 github.com/dusted-go/fault v1.0.0/go.mod h1:Lk3b6220V5WGPrLaAaBOpsA7qjogVj5f+76orT9ImCY=
 github.com/dusted-go/fault v1.1.0 h1:9hO7j3Bwh2YNNWtJz72ooW3pD+h2ch7PCe//lXPayBI=
 github.com/dusted-go/fault v1.1.0/go.mod h1:Lk3b6220V5WGPrLaAaBOpsA7qjogVj5f+76orT9ImCY=
+github.com/dusted-go/fault v1.2.0 h1:HV/IvKJQy7q73sTHPNqhKgeiVlI20D6iwVsDKJ1W6Z4=
+github.com/dusted-go/fault v1.2.0/go.mod h1:Lk3b6220V5WGPrLaAaBOpsA7qjogVj5f+76orT9ImCY=
 github.com/envoyproxy/go-control-plane v0.9.0/go.mod h1:YTl/9mNaCwkRvm6d1a2C3ymFceY/DCBVvsKhRF0iEA4=
 github.com/envoyproxy/go-control-plane v0.9.1-0.20191026205805-5f8ba28d4473/go.mod h1:YTl/9mNaCwkRvm6d1a2C3ymFceY/DCBVvsKhRF0iEA4=
 github.com/envoyproxy/go-control-plane v0.9.4/go.mod h1:6rpuAdCZL397s3pYoYcLgu1mIlRU8Am5FuJP05cCM98=
