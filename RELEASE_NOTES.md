@@ -1,6 +1,10 @@
 Release Notes
 =============
 
+## 1.15.1
+
+- Fixed `Empty()` inside `typ.URL`
+
 ## 1.15.0
 
 - Upgraded dependencies

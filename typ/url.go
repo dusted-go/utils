@@ -17,7 +17,7 @@ func NewURL(v string) URL {
 
 // Empty checks if the URL is empty.
 func (u URL) Empty() bool {
-	return len(string(u)) > 0
+	return len(string(u)) == 0
 }
 
 // String returns the URL as raw string.
