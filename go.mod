@@ -6,7 +6,7 @@ require (
 	cloud.google.com/go/datastore v1.8.0
 	cloud.google.com/go/pubsub v1.25.1
 	cloud.google.com/go/storage v1.27.0
-	github.com/dusted-go/fault v1.2.0
+	github.com/dusted-go/fault v1.3.0
 	github.com/google/uuid v1.3.0
 	google.golang.org/grpc v1.49.0
 )
