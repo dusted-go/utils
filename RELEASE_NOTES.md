@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+## 1.16.0
+
+- Added `array` package
+- Added `assert` package
+- Made `mapsort` more generic
+
 ## 1.15.1
 
 - Fixed `Empty()` inside `typ.URL`
