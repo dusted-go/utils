@@ -4,11 +4,10 @@ import (
 	"bytes"
 	"context"
 	"encoding/gob"
+	"errors"
 	"fmt"
 
 	"cloud.google.com/go/pubsub"
-
-	"github.com/dusted-go/fault/fault"
 )
 
 // ------
@@ -16,8 +15,8 @@ import (
 // ------
 // This struct is private on purpose so the user
 // is forced to use the NewEmail function and the
-// associated mutation functions which allow a
-// fluent way to construct a correct email object.
+// associated builder functions which allow a
+// safe way to construct a correct email object.
 // ------
 
 type email struct {
@@ -36,7 +35,7 @@ type email struct {
 }
 
 // NewEmail creates a new *email struct.
-// nolint
+// nolint: revive // Intended to force builder pattern
 func (c *Client) NewEmail(subject string, recipients ...string) *email {
 	return &email{
 		Domain:     c.domain,
@@ -95,8 +94,7 @@ func (e *email) ToBinary() ([]byte, error) {
 	enc := gob.NewEncoder(&b)
 	err := enc.Encode(e)
 	if err != nil {
-		return nil, fault.SystemWrap(err, "Client", "ToBinary",
-			"failed to encode email message")
+		return nil, fmt.Errorf("error encoding email message: %w", err)
 	}
 	return b.Bytes(), nil
 }
@@ -137,15 +135,12 @@ func (c *Client) sendMessage(
 
 	if c.topic == nil || len(c.domain) == 0 || len(c.sender) == 0 {
 		return emptyMessageID,
-			fault.System("Client", "sendMessage",
-				"cannot send email because the topic, domain or sender were not set")
+			errors.New("cannot send email because the topic, domain or sender were not set")
 	}
 
 	data, err := msg.ToBinary()
 	if err != nil {
-		return emptyMessageID,
-			fault.SystemWrap(err, "Client", "sendMessage",
-				"failed to serialize message to byte array.")
+		return emptyMessageID, fmt.Errorf("error serializing message to byte array: %w", err)
 	}
 	attr := map[string]string{
 		"environment": c.environmentName,
@@ -155,9 +150,8 @@ func (c *Client) sendMessage(
 		attr["traceID"] = msg.TraceID
 	}
 
-	result := c.topic.Publish(ctx,
-		// No need to init the rest
-		// nolint: exhaustivestruct
+	result := c.topic.Publish(
+		ctx,
 		&pubsub.Message{
 			Data:       data,
 			Attributes: attr,
@@ -169,14 +163,12 @@ func (c *Client) sendMessage(
 		msgID, err := result.Get(ctx)
 		if err != nil {
 			return msgID,
-				fault.SystemWrap(err, "Client", "sendMessage",
-					"failed to publish message to PubSub topic")
+				fmt.Errorf("error publishing message to PubSub topic '%s': %w", c.topic.ID(), err)
 		}
 		return msgID, nil
 	case <-ctx.Done():
 		return emptyMessageID,
-			fault.System("Client", "sendMessage",
-				"context got cancelled before email status could get verified")
+			errors.New("context got cancelled before email status could get verified")
 	}
 }
 

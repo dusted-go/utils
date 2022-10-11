@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+## 1.17.0
+
+- Renamed `typ.NewEmail` to `typ.ParseEmail`
+- Removed dependence on `fault` package
+
 ## 1.16.0
 
 - Added `array` package
@@ -96,7 +101,7 @@ The fault.SystemError implements the Unwrap method now.
 
 ## 1.1.0
 
-Added `fault.Userf`, `fault.Systemf` and `fault.SystemWrapf` functions.
+Added `fault.Userf`, `fault.Systemf` and `fmt.Errorff` functions.
 
 ## 1.0.0
 

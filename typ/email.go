@@ -1,9 +1,8 @@
 package typ
 
 import (
+	"errors"
 	"strings"
-
-	"github.com/dusted-go/fault/fault"
 )
 
 var (
@@ -34,33 +33,31 @@ func (e Email) Equals(other string) bool {
 	return e.value == strings.ToLower(other)
 }
 
-// NewEmail validates, normalises and creates a new email.
-func NewEmail(value string) (Email, error) {
+// ParseEmail validates, normalises and creates a new email.
+func ParseEmail(value string) (Email, error) {
 
-	invalidEmailFault := fault.User("invalid_email_address", "Email address is invalid.")
 	value = strings.TrimSpace(strings.ToLower(value))
 	length := len(value)
 
 	if length == 0 {
-		return EmptyEmail,
-			fault.User("missing_email_address", "Email address is required.")
+		return EmptyEmail, errors.New("email address cannot be empty")
 	}
 
 	// Assuming minimum email is: x@x.xx
 	if length < 6 {
-		return EmptyEmail, invalidEmailFault
+		return EmptyEmail, errors.New("email address is too short")
 	}
 
 	if !strings.ContainsRune(value, '@') {
-		return EmptyEmail, invalidEmailFault
+		return EmptyEmail, errors.New("email address must contain @ symbol")
 	}
 
 	if !strings.ContainsRune(value, '.') {
-		return EmptyEmail, invalidEmailFault
+		return EmptyEmail, errors.New("email address must contain . symbol")
 	}
 
 	if strings.LastIndex(value, ".") < strings.LastIndex(value, "@") {
-		return EmptyEmail, invalidEmailFault
+		return EmptyEmail, errors.New("email address must contain . symbol after @ symbol")
 	}
 
 	domain := strings.SplitN(value, "@", 2)[1]

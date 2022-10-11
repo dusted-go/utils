@@ -3,12 +3,11 @@ package webfile
 import (
 	"crypto/sha256"
 	"encoding/hex"
+	"fmt"
 	"mime"
 	"mime/multipart"
 	"net/http"
 	"path/filepath"
-
-	"github.com/dusted-go/fault/fault"
 )
 
 // MimeType returns the media type of a multipart.File object.
@@ -21,12 +20,12 @@ func MimeType(f multipart.File, h *multipart.FileHeader) (string, error) {
 	buff := make([]byte, 512)
 	_, err := f.Read(buff)
 	if err != nil {
-		return "", fault.SystemWrap(err, "webfile", "MimeType", "error reading the first 512 bytes")
+		return "", fmt.Errorf("error reading the first 512 bytes: %w", err)
 	}
 
 	_, err = f.Seek(0, 0)
 	if err != nil {
-		return "", fault.SystemWrap(err, "webfile", "MimeType", "error seeking file")
+		return "", fmt.Errorf("error seeking file: %w", err)
 	}
 
 	return http.DetectContentType(buff), nil
@@ -38,18 +37,18 @@ func Hash(f multipart.File, h *multipart.FileHeader, salt []byte) (string, error
 	buff := make([]byte, h.Size)
 	_, err := f.Read(buff)
 	if err != nil {
-		return "", fault.SystemWrap(err, "webfile", "Hash", "error reading file")
+		return "", fmt.Errorf("error reading file: %w", err)
 	}
 	_, err = f.Seek(0, 0)
 	if err != nil {
-		return "", fault.SystemWrap(err, "webfile", "Hash", "error seeking file")
+		return "", fmt.Errorf("error seeking file: %w", err)
 	}
 
 	buff = append(buff, salt...)
 	hasher := sha256.New()
 	_, err = hasher.Write(buff)
 	if err != nil {
-		return "", fault.SystemWrap(err, "webfile", "Hash", "error hashing file")
+		return "", fmt.Errorf("error hashing file: %w", err)
 	}
 	hash := hasher.Sum(nil)
 

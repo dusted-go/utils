@@ -4,7 +4,7 @@ import (
 	"testing"
 )
 
-func Test_New_Unhappy(t *testing.T) {
+func Test_ParseEmail_Unhappy(t *testing.T) {
 	cases := []string{
 		"",
 		"a",
@@ -15,7 +15,7 @@ func Test_New_Unhappy(t *testing.T) {
 	}
 
 	for _, value := range cases {
-		_, err := NewEmail(value)
+		_, err := ParseEmail(value)
 
 		if err == nil {
 			t.Errorf("The value '%s' was expected to fail email validation.", value)
@@ -23,14 +23,14 @@ func Test_New_Unhappy(t *testing.T) {
 	}
 }
 
-func Test_New_Happy(t *testing.T) {
+func Test_ParseEmail_Happy(t *testing.T) {
 	cases := []string{
 		"foo@bar.com",
 		"a@b.io",
 	}
 
 	for _, value := range cases {
-		_, err := NewEmail(value)
+		_, err := ParseEmail(value)
 
 		if err != nil {
 			t.Errorf("The value '%s' failed email validation.", value)
@@ -50,7 +50,7 @@ func Test_Domain_Normalised(t *testing.T) {
 	}
 
 	for _, value := range cases {
-		addr, err := NewEmail(value)
+		addr, err := ParseEmail(value)
 
 		if err != nil {
 			t.Errorf("The value '%s' failed email validation.", value)

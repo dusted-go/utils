@@ -3,12 +3,12 @@ package storage
 import (
 	"context"
 	"errors"
+	"fmt"
 	"io"
 	"mime/multipart"
 	"time"
 
 	"cloud.google.com/go/storage"
-	"github.com/dusted-go/fault/fault"
 )
 
 type Client struct {
@@ -18,8 +18,7 @@ type Client struct {
 func NewClient(ctx context.Context) (*Client, error) {
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		return nil,
-			fault.SystemWrap(err, "storage", "NewClient", "failed to create Google Cloud Storage client")
+		return nil, fmt.Errorf("error creating Google Cloud Storage client: %w", err)
 	}
 	return &Client{client: client}, nil
 }
@@ -47,23 +46,23 @@ func (c *Client) PutFile(
 			w.ContentType = mimeType
 
 			if _, err := io.Copy(w, file); err != nil {
-				return fault.SystemWrap(err, "storage", "PutFile", "failed to write file to Google Cloud Storage bucket")
+				return fmt.Errorf("error writing file to Google Cloud Storage bucket '%s': %w", bucketName, err)
 			}
 
 			if err := w.Close(); err != nil {
-				return fault.SystemWrap(err, "storage", "PutFile", "failed to close *storage.Writer after writing file to Google Cloud Storage bucket")
+				return fmt.Errorf("error closing *storage.Writer: %w", err)
 			}
 
 			if err := obj.ACL().Set(
 				ctx,
 				storage.ACLEntity(aclEntity),
 				storage.ACLRole(aclRole)); err != nil {
-				return fault.SystemWrap(err, "storage", "PutFile", "failed to set ACL on Google Cloud Storage object")
+				return fmt.Errorf("error setting ACL on Google Cloud Storage object: %w", err)
 			}
 			return nil
 		}
 
-		return fault.SystemWrap(err, "storage", "PutFile", "failed to check if file exists in Google Cloud Storage")
+		return fmt.Errorf("error retrieving object's metadata from Google Cloud Storage: %w", err)
 	}
 
 	return nil

@@ -3,12 +3,11 @@ package db
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"cloud.google.com/go/datastore"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-
-	"github.com/dusted-go/fault/fault"
 )
 
 // Repo exposes read and write operations to Google Cloud Datastore.
@@ -30,8 +29,7 @@ func NewRepo[T any](
 ) {
 	client, err := datastore.NewClient(ctx, projectID)
 	if err != nil {
-		return nil,
-			fault.SystemWrap(err, "db", "NewRepo", "failed to create Google Cloud Datastore Repo")
+		return nil, fmt.Errorf("error creating Google Cloud Datastore Repo: %w", err)
 	}
 	return &Repo[T]{
 		client:    client,
@@ -50,7 +48,7 @@ func (r *Repo[T]) Upsert(ctx context.Context, key string, entity *T) error {
 	k := datastore.NameKey(r.kind, key, nil)
 	k.Namespace = r.namespace
 	if _, err := r.client.Put(ctx, k, entity); err != nil {
-		return fault.SystemWrap(err, "db", "Upsert", "error writing to Google Cloud Datastore")
+		return fmt.Errorf("error writing to Google Cloud Datastore: %w", err)
 	}
 	return nil
 }
@@ -72,7 +70,7 @@ func (r *Repo[T]) Insert(ctx context.Context, key string, entity *T) (duplicate 
 			return true, nil
 		}
 
-		return false, fault.SystemWrap(dbErr, "db", "Insert", "error writing to Google Cloud Datastore")
+		return false, fmt.Errorf("error writing to Google Cloud Datastore: %w", dbErr)
 	}
 	return false, nil
 }
@@ -87,7 +85,7 @@ func (r *Repo[T]) Get(ctx context.Context, key string) (*T, error) {
 		if errors.Is(err, datastore.ErrNoSuchEntity) {
 			return nil, nil
 		}
-		return nil, fault.SystemWrap(err, "db", "Get", "error reading from Google Cloud Datastore")
+		return nil, fmt.Errorf("error reading from Google Cloud Datastore: %w", err)
 	}
 	return &entity, nil
 }
@@ -99,7 +97,7 @@ func (r *Repo[T]) Query(
 	q := query.Namespace(r.namespace)
 	var entities []*T
 	if _, err := r.client.GetAll(ctx, q, &entities); err != nil {
-		return nil, fault.SystemWrap(err, "db", "Query", "error reading from Google Cloud Datastore")
+		return nil, fmt.Errorf("error reading from Google Cloud Datastore: %w", err)
 	}
 	return entities, nil
 }
@@ -112,8 +110,7 @@ func (r *Repo[T]) Count(
 
 	keys, err := r.client.GetAll(ctx, q, nil)
 	if err != nil {
-		return -1,
-			fault.SystemWrap(err, "db", "Count", "error reading from Google Cloud Datastore")
+		return -1, fmt.Errorf("error reading from Google Cloud Datastore: %w", err)
 	}
 
 	return len(keys), nil
@@ -123,7 +120,7 @@ func (r *Repo[T]) Delete(ctx context.Context, key string) error {
 	k := datastore.NameKey(r.kind, key, nil)
 	k.Namespace = r.namespace
 	if err := r.client.Delete(ctx, k); err != nil {
-		return fault.SystemWrap(err, "db", "Delete", "error deleting entity in Google Cloud Datastore")
+		return fmt.Errorf("error deleting entity in Google Cloud Datastore: %w", err)
 	}
 	return nil
 }
