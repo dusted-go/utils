@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+## 2.0.0
+
+- Removed `typ` module
+- Removed all "clients"
+
 ## 1.17.0
 
 - Renamed `typ.NewEmail` to `typ.ParseEmail`

@@ -3,7 +3,7 @@ package array
 import (
 	"testing"
 
-	"github.com/dusted-go/utils/assert"
+	"github.com/dusted-go/utils/v2/assert"
 )
 
 func Test_ContainsMoreThan(t *testing.T) {
